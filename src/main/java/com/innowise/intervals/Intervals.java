@@ -1,53 +1,53 @@
 package com.innowise.intervals;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.concurrent.atomic.AtomicInteger;
-
 import lombok.extern.slf4j.Slf4j;
+
+import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 
 @Slf4j
 public class Intervals {
-    private static final Map<String, Integer> NOTES;
+    private static final Map<String, Integer> SEMITONES;
+    private static final String[] NOTES = {"C", "D", "E", "F", "G", "A", "B"};
     private static final Map<String, Integer> INTERVALS;
 
     static {
-        NOTES = new HashMap<>();
-        NOTES.put("Cbb", -2);
-        NOTES.put("Cb", -1);
-        NOTES.put("C", 0);
-        NOTES.put("C#", 1);
-        NOTES.put("C##", 2);
-        NOTES.put("Dbb", 0);
-        NOTES.put("Db", 1);
-        NOTES.put("D", 2);
-        NOTES.put("D#", 3);
-        NOTES.put("D##", 4);
-        NOTES.put("Ebb", 2);
-        NOTES.put("Eb", 3);
-        NOTES.put("E", 4);
-        NOTES.put("E#", 5);
-        NOTES.put("E##", 6);
-        NOTES.put("Fbb", 3);
-        NOTES.put("Fb", 4);
-        NOTES.put("F", 5);
-        NOTES.put("F#", 6);
-        NOTES.put("F##", 7);
-        NOTES.put("Gbb", 5);
-        NOTES.put("Gb", 6);
-        NOTES.put("G", 7);
-        NOTES.put("G#", 8);
-        NOTES.put("G##", 9);
-        NOTES.put("Abb", 7);
-        NOTES.put("Ab", 8);
-        NOTES.put("A", 9);
-        NOTES.put("A#", 10);
-        NOTES.put("A##", 11);
-        NOTES.put("Bbb", 9);
-        NOTES.put("Bb", 10);
-        NOTES.put("B", 11);
-        NOTES.put("B#", 12);
-        NOTES.put("B##", 13);
+        SEMITONES = new HashMap<>();
+        SEMITONES.put("Cbb", -2);
+        SEMITONES.put("Cb", -1);
+        SEMITONES.put("C", 0);
+        SEMITONES.put("C#", 1);
+        SEMITONES.put("C##", 2);
+        SEMITONES.put("Dbb", 0);
+        SEMITONES.put("Db", 1);
+        SEMITONES.put("D", 2);
+        SEMITONES.put("D#", 3);
+        SEMITONES.put("D##", 4);
+        SEMITONES.put("Ebb", 2);
+        SEMITONES.put("Eb", 3);
+        SEMITONES.put("E", 4);
+        SEMITONES.put("E#", 5);
+        SEMITONES.put("E##", 6);
+        SEMITONES.put("Fbb", 3);
+        SEMITONES.put("Fb", 4);
+        SEMITONES.put("F", 5);
+        SEMITONES.put("F#", 6);
+        SEMITONES.put("F##", 7);
+        SEMITONES.put("Gbb", 5);
+        SEMITONES.put("Gb", 6);
+        SEMITONES.put("G", 7);
+        SEMITONES.put("G#", 8);
+        SEMITONES.put("G##", 9);
+        SEMITONES.put("Abb", 7);
+        SEMITONES.put("Ab", 8);
+        SEMITONES.put("A", 9);
+        SEMITONES.put("A#", 10);
+        SEMITONES.put("A##", 11);
+        SEMITONES.put("Bbb", 9);
+        SEMITONES.put("Bb", 10);
+        SEMITONES.put("B", 11);
+        SEMITONES.put("B#", 12);
+        SEMITONES.put("B##", 13);
 
         INTERVALS = new HashMap<>();
         INTERVALS.put("m2", 1);
@@ -66,20 +66,29 @@ public class Intervals {
     public static String intervalConstruction(String[] arr) {
         checkArgumentsCount(arr);
 
-        String interval = arr[0];
-        String startNote = arr[1];
+        final var interval = arr[0];
+        final var startNote = arr[1];
 
-        int startNoteIndex = NOTES.get(startNote);
-        int semitones = INTERVALS.get(interval);
+        final var startNoteIndex = SEMITONES.get(startNote);
+        final var semitones = INTERVALS.get(interval);
 
-        final var endNoteIndex = new AtomicInteger((checkIfOrderIsAscending(arr) ? startNoteIndex + semitones : startNoteIndex - semitones) % 12);
+        final var startNodeDegree = getNotePosition(startNote.charAt(0));
+        final var degreesToMove = Integer.parseInt(String.valueOf(interval.charAt(1)));
+        var endNoteDegreeIndex = (checkIfOrderIsAscending(arr) ? startNodeDegree + degreesToMove - 2 : startNodeDegree - degreesToMove) % NOTES.length;
 
-        if (endNoteIndex.get() < 0) {
-            endNoteIndex.set(endNoteIndex.get() + 12);
+        if (endNoteDegreeIndex < 0){
+            endNoteDegreeIndex += NOTES.length;
+        }
+        final var endNoteSemitoneIndex = new AtomicInteger((checkIfOrderIsAscending(arr) ? startNoteIndex + semitones : startNoteIndex - semitones) % 12);
+        final var endNoteDegree = NOTES[endNoteDegreeIndex + 1];
+
+        if (endNoteSemitoneIndex.get() < 0) {
+            endNoteSemitoneIndex.set(endNoteSemitoneIndex.get() + 12);
         }
 
-        return NOTES.entrySet().stream()
-                .filter(entry -> entry.getValue().equals(endNoteIndex.get()))
+        return SEMITONES.entrySet().stream()
+                .filter(entry -> String.valueOf(entry.getKey().charAt(0)).equals(endNoteDegree))
+                .filter(entry -> entry.getValue().equals(endNoteSemitoneIndex.get()))
                 .map(Map.Entry::getKey)
                 .findFirst()
                 .orElseThrow(() -> new IllegalArgumentException("Invalid input"));
@@ -88,13 +97,13 @@ public class Intervals {
     public static String intervalIdentification(String[] arr) {
         checkArgumentsCount(arr);
 
-        int startNoteIndex = NOTES.get(arr[0]);
-        int endNoteIndex = NOTES.get(arr[1]);
+        final var startNoteIndex = SEMITONES.get(arr[0]);
+        var endNoteIndex = SEMITONES.get(arr[1]);
         if (startNoteIndex > endNoteIndex) {
             endNoteIndex += 12;
         }
 
-        final var semitones = new AtomicInteger(Math.abs(endNoteIndex - startNoteIndex) % NOTES.size());
+        final var semitones = new AtomicInteger(Math.abs(endNoteIndex - startNoteIndex) % SEMITONES.size());
 
         if (!checkIfOrderIsAscending(arr)) {
             semitones.set(-semitones.get());
@@ -108,7 +117,7 @@ public class Intervals {
                 .orElseThrow(() -> new IllegalArgumentException("Invalid input"));
     }
 
-    private static void checkArgumentsCount(String[] arr){
+    private static void checkArgumentsCount(String[] arr) {
         if (arr.length < 2 || arr.length > 3) {
             throw new IllegalArgumentException("Illegal number of elements: 2 or 3 elements needed");
         }
@@ -123,5 +132,15 @@ public class Intervals {
             }
         }
         return true;
+    }
+
+    private static int getNotePosition(char note) {
+        var position = -1;
+        for (var i = 0; i < NOTES.length; i++){
+            if (Objects.equals(String.valueOf(note), NOTES[i])){
+                position = i;
+            }
+        }
+        return position;
     }
 }

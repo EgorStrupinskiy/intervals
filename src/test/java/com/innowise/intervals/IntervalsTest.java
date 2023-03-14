@@ -12,10 +12,11 @@ public class IntervalsTest {
             final String firstNote, final String secondNote, final String order, final String interval) {
         //given
         var expected = interval;
+
         //when
         var actual = Intervals.intervalIdentification(new String[]{firstNote, secondNote, order});
-        //then
 
+        //then
         assertEquals(expected, actual);
     }
 
@@ -25,10 +26,11 @@ public class IntervalsTest {
             final String firstNote, final String interval, final String order, final String secondNote) {
         //given
         var expected = secondNote;
+
         //when
         var actual = Intervals.intervalConstruction(new String[]{firstNote, interval, order});
-        //then
 
+        //then
         assertEquals(expected, actual);
     }
 }
