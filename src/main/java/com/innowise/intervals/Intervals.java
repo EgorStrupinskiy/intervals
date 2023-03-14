@@ -49,7 +49,7 @@ public class Intervals {
         NOTES.put("B#", 12);
         NOTES.put("B##", 13);
 
-        INTERVALS = new HashMap<String, Integer>();
+        INTERVALS = new HashMap<>();
         INTERVALS.put("m2", 1);
         INTERVALS.put("M2", 2);
         INTERVALS.put("m3", 3);
@@ -64,13 +64,48 @@ public class Intervals {
     }
 
     public static String intervalConstruction(String[] arr) {
+        checkArgumentsCount(arr);
 
-        return null;
+        String interval = arr[0];
+        String startNote = arr[1];
+
+        int startNoteIndex = NOTES.get(startNote);
+        int semitones = INTERVALS.get(interval);
+
+        final var endNoteIndex = new AtomicInteger((checkIfOrderIsAscending(arr) ? startNoteIndex + semitones : startNoteIndex - semitones) % 12);
+
+        if (endNoteIndex.get() < 0) {
+            endNoteIndex.set(endNoteIndex.get() + 12);
+        }
+
+        return NOTES.entrySet().stream()
+                .filter(entry -> entry.getValue().equals(endNoteIndex.get()))
+                .map(Map.Entry::getKey)
+                .findFirst()
+                .orElseThrow(() -> new IllegalArgumentException("Invalid input"));
     }
 
     public static String intervalIdentification(String[] arr) {
+        checkArgumentsCount(arr);
 
-        return null;
+        int startNoteIndex = NOTES.get(arr[0]);
+        int endNoteIndex = NOTES.get(arr[1]);
+        if (startNoteIndex > endNoteIndex) {
+            endNoteIndex += 12;
+        }
+
+        final var semitones = new AtomicInteger(Math.abs(endNoteIndex - startNoteIndex) % NOTES.size());
+
+        if (!checkIfOrderIsAscending(arr)) {
+            semitones.set(-semitones.get());
+            semitones.set(semitones.get() + 12);
+        }
+
+        return INTERVALS.entrySet().stream()
+                .filter(entry -> entry.getValue().equals(semitones.get()))
+                .map(Map.Entry::getKey)
+                .findFirst()
+                .orElseThrow(() -> new IllegalArgumentException("Invalid input"));
     }
 
     private static void checkArgumentsCount(String[] arr){
