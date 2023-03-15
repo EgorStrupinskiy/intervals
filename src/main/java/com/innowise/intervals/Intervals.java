@@ -98,14 +98,14 @@ public class Intervals {
     public static String intervalConstruction(String[] arr) {
         checkArgumentsCount(arr);
 
-        final var interval = arr[0];
-        final var startNote = arr[1];
+        final String interval = arr[0];
+        final String startNote = arr[1];
 
-        final var semitonesToMove = INTERVALS.get(interval);
-        final var startNoteSemitoneIndex = SEMITONES.get(startNote);
+        final int semitonesToMove = INTERVALS.get(interval);
+        final int startNoteSemitoneIndex = SEMITONES.get(startNote);
 
-        final var startNodeDegree = getNotePositionInSequence(startNote.charAt(0));
-        final var degreesToMove = Integer.parseInt(String.valueOf(interval.charAt(1)));
+        final int startNodeDegree = getNotePositionInSequence(startNote.charAt(0));
+        final int degreesToMove = Integer.parseInt(String.valueOf(interval.charAt(1)));
         var endNoteDegreeIndex = (checkIfOrderIsAscending(arr) ? startNodeDegree + degreesToMove - 2 : startNodeDegree - degreesToMove) % NOTES_COUNT;
 
         if (endNoteDegreeIndex < 0) {
@@ -113,7 +113,7 @@ public class Intervals {
         }
 
         final var endNoteSemitoneIndex = new AtomicInteger((checkIfOrderIsAscending(arr) ? startNoteSemitoneIndex + semitonesToMove : startNoteSemitoneIndex - semitonesToMove) % SEMITONES_COUNT);
-        final var endNoteDegree = NOTES[endNoteDegreeIndex + 1];
+        final String endNoteDegree = NOTES[endNoteDegreeIndex + 1];
 
         if (endNoteSemitoneIndex.get() < 0) {
             endNoteSemitoneIndex.set(endNoteSemitoneIndex.get() + SEMITONES_COUNT);
@@ -137,8 +137,8 @@ public class Intervals {
     public static String intervalIdentification(String[] arr) {
         checkArgumentsCount(arr);
 
-        final var startNoteSemitoneIndex = SEMITONES.get(arr[0]);
-        var endNoteSemitoneIndex = SEMITONES.get(arr[1]);
+        final int startNoteSemitoneIndex = SEMITONES.get(arr[0]);
+        int endNoteSemitoneIndex = SEMITONES.get(arr[1]);
 
         if (startNoteSemitoneIndex > endNoteSemitoneIndex) {
             endNoteSemitoneIndex += SEMITONES_COUNT;
@@ -175,8 +175,8 @@ public class Intervals {
     }
 
     private static int getNotePositionInSequence(char note) {
-        var position = -1;
-        for (var i = 0; i < NOTES_COUNT; i++) {
+        int position = -1;
+        for (int i = 0; i < NOTES_COUNT; i++) {
             if (Objects.equals(String.valueOf(note), NOTES[i])) {
                 position = i;
             }
